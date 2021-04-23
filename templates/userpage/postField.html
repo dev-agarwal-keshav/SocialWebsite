@@ -1,0 +1,144 @@
+{%extends 'base.html'%}
+{% block nav_btn1%}
+<button type="button" class="btn btn-outline-primary ml-4" data-toggle="modal" data-target="#postModal">
+    Add Post
+</button>
+<a href="/logout" role="button" class="btn btn-outline-primary ml-4">
+    Logout
+</a>
+{%endblock%}
+{%block body%}
+<div class="container my-4" style="width: 500px;">
+    {% for i in posts%}
+    <div class="card my-2" id="{{ i.id }}">
+        <h5 class="card-header"><a href="{% url 'userProfile' i.user %}" style="color: black;">{{i.user}}</a> <small style="position: absolute;  right: 0px; padding-right: 10px;">{{i.date.date}}</small></h5>
+        <div class="card-body">
+            <pre><p class="card-title" style="font-family: roboto">{{i.caption}}</p></pre>
+            {% if i.image %}
+            <img src="{{i.image.url}}" alt="image" id="post_img" style="max-width:400px; max-height: 300px; display: block; margin-left: auto; margin-right: auto;">
+            {%endif%}
+            <hr>
+            {% if i in liked_post %}
+            <button class="btn btn-primary like" id="{{i.id}}"><a href="{% url 'like_dislike_post' %}" style="color:white;" id="like_text{{i.id}}">Liked</a></button>
+            {% else %}
+            <button class="btn btn-primary like" id="{{i.id}}"><a href="{% url 'like_dislike_post' %}" style="color:white;" id="like_text{{i.id}}">Like</a></button>
+            {% endif %}
+            <button type="button" class="btn btn-warning commentor" data-toggle="modal" data-target="#commentModal{{i.id}}" id="com{{i.id}}">
+                Comment
+            </button>
+            <a href="#" class="btn btn-info ml-2">Repost</a>
+            {%if i.user == request.user %}
+            <a href="{% url 'delPost' i.id %}" class="btn btn-danger mx-3 delete" id="{{i.id}}">Delete</a>
+            {%endif%}
+        </div>
+    </div>
+    {%endfor%}
+</div>
+{%endblock%}
+{%block model %}
+<div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="postModalLabel">Add Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/userpage/addpost" enctype="multipart/form-data">{%csrf_token%}
+                    <div class="form-group">
+                        <label for="caption">Caption</label>
+                        <textarea class="form-control" id="caption" rows="3" name="caption" placeholder="Caption goes here"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="images">Add Image</label>
+                        <input type="file" class="form-control-file" id="image" name="image">
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% for i in posts%}
+<div class="modal fade" id="commentModal{{i.id}}" tabindex="-1" role="dialog" aria-labelledby="commentBox" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">Comments</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="get" action="/userpage/comment">{% csrf_token%}
+                    <div class="form-group row mx-3">
+                        <label for="comment_text" class="col-sm-2 col-form-label">Comment</label>
+                        <div class="input-group mb-3">
+                            <textarea type="text" class="form-control" placeholder="Comment" aria-label="Recipient's username" aria-describedby="button-addon2" name="comment"></textarea>
+                            <input type="hidden" name="poster" id="poster">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Post</button>
+                            </div>
+                        </div>
+                </form>
+            </div>
+            <hr>
+            <div class="container">
+               
+            </div>
+        </div>
+    </div>
+</div>
+{%endfor%}
+{%endblock%}
+{% block js %}
+<script>
+$(".delete").click(function(e) {
+    var id = this.id;
+    var href = this.href;
+    console.log(href, id) // get href from link
+    e.preventDefault(); // don't follow the link
+
+    $.ajax({
+        url: href,
+        data: {},
+    });
+
+    $("#" + id).fadeOut(1000);
+
+});
+
+$(".like").click(function(e) {
+    var id = this.id;
+    var href = $('.like').find('a').attr('href');
+    console.log(href, id) // get href from link
+    e.preventDefault(); // don't follow the link
+
+    $.ajax({
+        url: href,
+        data: { 'likeID': id },
+        success: function(response) {
+
+            if (response.liked) {
+                $('#like_text' + id).html("Liked")
+            } else {
+                $('#like_text' + id).html("Like")
+            }
+
+        }
+    });
+
+
+});
+$(".commentor").click(function(e) {
+    var id = this.id;
+    console.log(id)
+    $('#poster').val(id)
+    
+})
+</script>
+{% endblock %}

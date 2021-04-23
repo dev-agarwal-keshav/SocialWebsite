@@ -1,0 +1,61 @@
+{%extends 'base.html'%}
+{% block body %}
+<h1>{{data.bio}}</h1>
+<div class="container">
+    <div class="media">
+        <img src="{{userImg.url}}" class="align-self-start mr-3 userImage" alt="Avatar" style="height: 200px; width: 200px;  border-radius: 50%">
+        <div class="media-body ml-4" style="padding-top: 2%; padding-left: 2%; ">
+            <h4 class="mt-0">{{username.username}}</h4>
+            {%if not username == request.user%}
+
+            {% if connection %}
+            <a class="btn btn-outline-success my-2 my-sm-0" role="button" href="{% url 'follow' username.username %}" id="follow">Unfollow</a>
+            {%else%}
+            <a class="btn btn-outline-success my-2 my-sm-0" role="button" href="{% url 'follow' username.username %}" id="follow">Follow</a>
+            {%endif%}
+            {%endif%}
+            <p>Follower: <span id="following_temp"> {{follower}} </span>
+            	<p>Following: {{following}}</p>
+            <p>{{bio}}</p>
+            <p><a href="{{conn}}">{{conn}}</a></p>
+        </div>
+    </div>
+    <hr style="border-top: 2px solid black;">
+    <div class="row">
+        {% for i in posts%}
+        {% for j in i %}
+        <div class="col-md-4">
+            <img src="{{j.image.url}}" alt="Image" style=" width: 350px; height: 400px; margin-bottom: 30px">
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{%endblock%}
+{% block js%}
+<script>
+$('#follow').click(function(e) {
+    e.preventDefault();
+    var href = this.href;
+
+    $.ajax({
+        url: href,
+        success: function(response) {
+            if (response.following) {
+                $('#follow').html("Unfollow")
+                $('#following_temp').html({{follower}}+1)
+            } else {
+                $('#follow').html("Follow")
+                $('#following_temp').html({{follower}}-1)
+            }
+        }
+
+    })
+})
+</script>
+{% endblock %}
+{% block nav_btn1%}
+<a href="/logout" role="button" class="btn btn-outline-primary ml-4">
+    Logout
+</a>
+{%endblock%}

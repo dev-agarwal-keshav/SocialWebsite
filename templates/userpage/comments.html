@@ -1,0 +1,28 @@
+{%extends 'base.html'%}
+{% block body %}
+<div class="container my-4 mx-4">
+    <form method="get">
+        <div class="form-group row">
+            <label for="comment_text" class="col-sm-2 col-form-label">Comment</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="comment_text" name="comment">
+            </div>
+        </div>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
+    </form>
+</div>
+<div class="container my-4 mx-4">
+	{% for i in %}
+    <div class="card">
+        <div class="card-header">
+            username
+        </div>
+        <div class="card-body">
+            <blockquote class="blockquote mb-0">
+                <p>comment</p>
+                <footer class="blockquote-footer"><cite title="Source Title">duration</cite></footer>
+            </blockquote>
+        </div>
+    </div>
+</div>
+{% endblock %}
